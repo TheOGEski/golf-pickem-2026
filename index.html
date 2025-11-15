@@ -1140,12 +1140,12 @@
                     <div style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
                         <h3 style="color: #1a5f3a; margin-bottom: 15px;">Add New User</h3>
                         <div class="input-group">
-                            <label for="adminNewUsername">Username (for login)</label>
-                            <input type="text" id="adminNewUsername" placeholder="e.g., john_doe or john@email.com">
+                            <label for="adminNewUsername">Username (required - used for login)</label>
+                            <input type="text" id="adminNewUsername" placeholder="e.g., JohnDoe or john_doe">
                         </div>
                         <div class="input-group">
-                            <label for="adminNewDisplayName">Display Name (shown in app)</label>
-                            <input type="text" id="adminNewDisplayName" placeholder="e.g., John Doe">
+                            <label for="adminNewEmail">Email Address (optional - for notifications)</label>
+                            <input type="email" id="adminNewEmail" placeholder="e.g., john@example.com">
                         </div>
                         <button class="btn btn-success" onclick="addNewUser()" style="width: 100%; margin-top: 10px;">➕ Add User</button>
                     </div>
@@ -1176,7 +1176,10 @@
                 </div>
             `;
             
-            await loadUserList();
+            // Small delay to ensure DOM is ready
+            setTimeout(async () => {
+                await loadUserList();
+            }, 100);
         }
 
         async function loadUserList() {
@@ -1226,15 +1229,10 @@
 
         async function addNewUser() {
             const username = document.getElementById('adminNewUsername').value.trim();
-            const displayName = document.getElementById('adminNewDisplayName').value.trim();
+            const email = document.getElementById('adminNewEmail').value.trim();
             
             if (!username) {
                 showStatus("Please enter a username", "error");
-                return;
-            }
-            
-            if (!displayName) {
-                showStatus("Please enter a display name", "error");
                 return;
             }
             
@@ -1248,17 +1246,32 @@
                     return;
                 }
                 
-                // Create new user
-                await db.ref(`users/${sanitizedUsername}`).set({
+                // Create new user - use username as display name
+                const userData = {
                     username: username,
-                    displayName: displayName,
+                    displayName: username,
                     passwordSet: false,
                     created: Date.now()
-                });
+                };
                 
-                showStatus(`User "${displayName}" created successfully!`, "success");
+                // Add email if provided
+                if (email) {
+                    userData.email = email;
+                    userData.notifications = {
+                        fieldOpen: true,
+                        deadlineWarning: true,
+                        resultsFinalized: true,
+                        fedupCupUpdate: true,
+                        fedupCupLeader: true,
+                        weeklyDigest: true
+                    };
+                }
+                
+                await db.ref(`users/${sanitizedUsername}`).set(userData);
+                
+                showStatus(`User "${username}" created successfully!`, "success");
                 document.getElementById('adminNewUsername').value = '';
-                document.getElementById('adminNewDisplayName').value = '';
+                document.getElementById('adminNewEmail').value = '';
                 
                 setTimeout(() => showStatus("", ""), 3000);
                 await loadUserList();
