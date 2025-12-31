@@ -488,6 +488,8 @@ function selectTiebreaker(player) {
     
     // Auto-advance to review step
     setTimeout(() => {
+        // Update the summary panel first
+        renderPicksSummaryPanel();
         showFinalReview();
     }, 500);
 }
