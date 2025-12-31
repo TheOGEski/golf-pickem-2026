@@ -180,7 +180,7 @@ function renderStep1_WinnerPick(container) {
     
     // Create player grid
     const playersContainer = document.getElementById('step1-players');
-    const sortedPlayers = PlayerData.sortPlayers([...tournamentPlayers]);
+    const sortedPlayers = PlayerData.sortPlayers([...tournamentPlayers], 'ranking');
     
     const grid = PlayerData.createPlayerGrid(sortedPlayers, {
         selectedPlayerIds: wizardState.winnerPick ? [wizardState.winnerPick] : [],
@@ -486,11 +486,13 @@ function selectTiebreaker(player) {
     
     showStatus(`Tiebreaker selected: ${PlayerData.formatPlayerName(player)}. Review your picks!`, 'success');
     
-    // Auto-advance to review step
+    // Auto-advance to review step - update summary immediately
     setTimeout(() => {
-        // Update the summary panel first
-        renderPicksSummaryPanel();
         showFinalReview();
+        // Force summary refresh after review screen is shown
+        setTimeout(() => {
+            renderPicksSummaryPanel();
+        }, 100);
     }, 500);
 }
 
