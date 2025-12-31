@@ -38,13 +38,20 @@ const PlayerData = {
         });
     },
     
-    // Sort players alphabetically
-    sortPlayers: function(players) {
-        return players.sort((a, b) => {
-            const nameA = this.formatPlayerName(a);
-            const nameB = this.formatPlayerName(b);
-            return nameA.localeCompare(nameB);
-        });
+    // Sort players - by field order (ranking) or alphabetically
+    sortPlayers: function(players, sortBy = 'ranking') {
+        if (sortBy === 'alpha') {
+            // Alphabetical sort
+            return players.sort((a, b) => {
+                const nameA = this.formatPlayerName(a);
+                const nameB = this.formatPlayerName(b);
+                return nameA.localeCompare(nameB);
+            });
+        } else {
+            // Keep ESPN field order (typically by ranking)
+            // Don't sort - ESPN provides them in ranking order
+            return players;
+        }
     },
     
     // Filter out already selected players
